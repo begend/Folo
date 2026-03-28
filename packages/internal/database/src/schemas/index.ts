@@ -209,3 +209,54 @@ export const aiChatMessagesTable = sqliteTable(
 )
 
 export type AiChatMessagesModel = typeof aiChatMessagesTable.$inferSelect
+
+// Annotations Table - Article highlights and notes
+export const annotationsTable = sqliteTable(
+  "annotations",
+  (t) => ({
+    // Primary key and relations
+    id: t.text("id").notNull().primaryKey(),
+    entryId: t
+      .text("entry_id")
+      .notNull()
+      .references(() => entriesTable.id, { onDelete: "cascade" }),
+    userId: t.text("user_id"),
+
+    // Annotation type and content
+    type: t.text("type").notNull().$type<"highlight" | "note" | "mixed">(),
+
+    // Highlight related
+    text: t.text("text"),
+    color: t.text("color"), // yellow | green | blue | pink | orange
+
+    // Note related
+    note: t.text("note"),
+
+    // Position data (mixed strategy)
+    positionData: t.text("position_data", { mode: "json" }).$type<{
+      textHash?: string
+      contextBefore?: string
+      contextAfter?: string
+      offset?: number
+      length?: number
+      xpath?: string
+    }>(),
+
+    // Timestamps
+    createdAt: t
+      .integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+    updatedAt: t
+      .integer("updated_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+    syncedAt: t.integer("synced_at", { mode: "timestamp_ms" }),
+  }),
+  (table) => [
+    index("idx_annotations_entry_created").on(table.entryId, table.createdAt),
+    index("idx_annotations_user_created").on(table.userId, table.createdAt),
+    index("idx_annotations_type").on(table.type),
+    index("idx_annotations_synced").on(table.syncedAt),
+  ],
+)
