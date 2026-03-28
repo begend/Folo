@@ -1,7 +1,7 @@
 import { AvatarGroup } from "@follow/components/ui/avatar-group/index.js"
 import { FeedViewType } from "@follow/constants"
 import { useEntryReadHistory } from "@follow/store/entry/hooks"
-import { useWhoami } from "@follow/store/user/hooks"
+import { useIsLoggedIn, useWhoami } from "@follow/store/user/hooks"
 
 import { getRouteParams } from "~/hooks/biz/useRouteParams"
 import { useAppLayoutGridContainerWidth } from "~/providers/app-grid-layout-container-provider"
@@ -28,7 +28,8 @@ const getLimit = (width: number): number => {
 
 export const EntryReadHistory: Component<{ entryId: string }> = ({ entryId }) => {
   const me = useWhoami()
-  const data = useEntryReadHistory(entryId)
+  const isLoggedIn = useIsLoggedIn()
+  const data = useEntryReadHistory(entryId, 20, isLoggedIn)
   const entryHistory = data?.entryReadHistories
 
   const totalCount = data?.total || 0
@@ -38,6 +39,7 @@ export const EntryReadHistory: Component<{ entryId: string }> = ({ entryId }) =>
   const LIMIT = getLimit(appGirdContainerWidth)
 
   const placeholder = <div className="-mb-3 h-10" />
+  if (!isLoggedIn) return placeholder
   if (!entryHistory) return placeholder
   if (!me) return placeholder
 

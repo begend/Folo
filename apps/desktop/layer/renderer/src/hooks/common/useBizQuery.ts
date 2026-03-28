@@ -1,3 +1,4 @@
+import { useIsLoggedIn } from "@follow/store/user/hooks"
 import type { QueryKey, UseQueryOptions, UseQueryResult } from "@tanstack/react-query"
 import { useQuery } from "@tanstack/react-query"
 import type { FetchError } from "ofetch"
@@ -19,13 +20,14 @@ export function useAuthQuery<
   options: Omit<UseQueryOptions<TQueryFnData, TError>, "queryKey" | "queryFn"> = {},
 ): CombinedObject<UseQueryResult<TData, TError>, { key: TQuery["key"]; fn: TQuery["fn"] }> {
   const authFail = useLoginModalShow()
+  const isLoggedIn = useIsLoggedIn()
   // @ts-expect-error
   return Object.assign(
     {},
     useQuery({
       queryKey: query.key,
       queryFn: query.fn,
-      enabled: !authFail && options.enabled !== false,
+      enabled: isLoggedIn && !authFail && options.enabled !== false,
       ...options,
     }),
     {
