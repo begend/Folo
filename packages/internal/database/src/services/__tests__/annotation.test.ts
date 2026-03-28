@@ -1,0 +1,145 @@
+import { beforeEach, describe, expect, it } from "vitest"
+
+import type { CreateAnnotationDTO, PositionData } from "../../schemas/types"
+import { annotationService } from "../annotation"
+
+describe("AnnotationService", () => {
+  beforeEach(async () => {
+    await annotationService.reset()
+  })
+
+  it("should create annotation", async () => {
+    const data: CreateAnnotationDTO & { id: string } = {
+      id: "test-annotation-1",
+      entryId: "entry-1",
+      type: "highlight",
+      text: "Test highlight",
+      color: "yellow",
+      positionData: {} as PositionData,
+    }
+
+    await annotationService.createAnnotation(data)
+
+    const result = await annotationService.getAnnotationById("test-annotation-1")
+    expect(result).toBeDefined()
+    expect(result?.text).toBe("Test highlight")
+  })
+
+  it("should get annotations by entry", async () => {
+    const entryId = "entry-1"
+
+    await annotationService.createAnnotation({
+      id: "annotation-1",
+      entryId,
+      type: "highlight",
+      text: "First",
+      color: "yellow",
+      positionData: {} as PositionData,
+    })
+
+    await annotationService.createAnnotation({
+      id: "annotation-2",
+      entryId,
+      type: "note",
+      note: "Test note",
+      positionData: {} as PositionData,
+    })
+
+    const result = await annotationService.getAnnotationsByEntry(entryId)
+    expect(result).toHaveLength(2)
+  })
+
+  it("should update annotation", async () => {
+    const id = "annotation-1"
+    await annotationService.createAnnotation({
+      id,
+      entryId: "entry-1",
+      type: "highlight",
+      text: "Original",
+      color: "yellow",
+      positionData: {} as PositionData,
+    })
+
+    await annotationService.updateAnnotation(id, { color: "green" })
+
+    const result = await annotationService.getAnnotationById(id)
+    expect(result?.color).toBe("green")
+  })
+
+  it("should delete annotation", async () => {
+    const id = "annotation-1"
+    await annotationService.createAnnotation({
+      id,
+      entryId: "entry-1",
+      type: "highlight",
+      text: "To delete",
+      color: "yellow",
+      positionData: {} as PositionData,
+    })
+
+    await annotationService.deleteAnnotation(id)
+
+    const result = await annotationService.getAnnotationById(id)
+    expect(result).toBeUndefined()
+  })
+
+  it("should batch create annotations", async () => {
+    const annotations = [
+      {
+        id: "batch-1",
+        entryId: "entry-1",
+        type: "highlight" as const,
+        text: "Batch 1",
+        color: "yellow" as const,
+        positionData: {} as PositionData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "batch-2",
+        entryId: "entry-1",
+        type: "note" as const,
+        note: "Batch note",
+        positionData: {} as PositionData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]
+
+    await annotationService.batchCreate(annotations)
+
+    const result = await annotationService.getAnnotationsByEntry("entry-1")
+    expect(result).toHaveLength(2)
+  })
+
+  it("should get unsynced annotations", async () => {
+    await annotationService.createAnnotation({
+      id: "unsynced-1",
+      entryId: "entry-1",
+      type: "highlight",
+      text: "Unsynced",
+      color: "yellow",
+      positionData: {} as PositionData,
+    })
+
+    const unsynced = await annotationService.getUnsyncedAnnotations()
+    expect(unsynced).toHaveLength(1)
+    expect(unsynced[0].id).toBe("unsynced-1")
+  })
+
+  it("should mark annotations as synced", async () => {
+    await annotationService.createAnnotation({
+      id: "to-sync-1",
+      entryId: "entry-1",
+      type: "highlight",
+      text: "To sync",
+      color: "yellow",
+      positionData: {} as PositionData,
+    })
+
+    await annotationService.markAsSynced(["to-sync-1"])
+
+    const unsynced = await annotationService.getUnsyncedAnnotations()
+    expect(unsynced).toHaveLength(0)
+  })
+})
