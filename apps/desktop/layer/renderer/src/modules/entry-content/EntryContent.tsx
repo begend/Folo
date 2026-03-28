@@ -18,8 +18,6 @@ import { useAnimationControls } from "motion/react"
 import * as React from "react"
 import { memo, useEffect, useRef, useState } from "react"
 
-import { AnnotationContainer } from "./annotations"
-
 import { useShowAITranslation } from "~/atoms/ai-translation"
 import { useEntryIsInReadability } from "~/atoms/readability"
 import { useActionLanguage } from "~/atoms/settings/general"
@@ -35,6 +33,7 @@ import { useBlockActions } from "~/modules/ai-chat/store/hooks"
 import { BlockSliceAction } from "~/modules/ai-chat/store/slices/block.slice"
 import { COMMAND_ID } from "~/modules/command/commands/id"
 
+import { AnnotationContainer } from "./annotations"
 import { setEntryContentScrollToTop } from "./atoms"
 import { ApplyEntryActions } from "./components/ApplyEntryActions"
 import { EntryCommandShortcutRegister } from "./components/entry-content/EntryCommandShortcutRegister"
@@ -154,7 +153,7 @@ const EntryContentImpl: Component<EntryContentProps> = ({
             title: entryTranslation.title ?? undefined,
           }
         : undefined,
-    [entryTranslation?.content, entryTranslation?.title],
+    [entryTranslation],
   )
   return (
     <div className={cn(className, "flex flex-row @container")}>

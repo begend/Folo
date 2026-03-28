@@ -87,6 +87,7 @@ const proxyConfig = {
 export default ({ mode }) => {
   const env = loadEnv(mode, process.cwd())
   const typedEnv = env as typeof EnvType
+  const hmrPort = Number.parseInt(env.VITE_HMR_PORT || "", 10)
 
   return defineConfig({
     ...viteRenderBaseConfig,
@@ -107,6 +108,13 @@ export default ({ mode }) => {
     server: {
       host: true,
       port: 2233,
+      ...(Number.isFinite(hmrPort)
+        ? {
+            hmr: {
+              port: hmrPort,
+            },
+          }
+        : {}),
       watch: {
         ignored: ["**/dist/**", "**/out/**", "**/public/**", ".git/**"],
       },
@@ -123,6 +131,15 @@ export default ({ mode }) => {
         "/reset-password": proxyConfig,
         "/register": proxyConfig,
         "/share": proxyConfig,
+        "/better-auth": {
+          target: typedEnv.VITE_API_URL,
+          changeOrigin: true,
+        },
+        "/api": {
+          target: typedEnv.VITE_API_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ""),
+        },
 
         ...(env.VITE_DEV_PROXY
           ? {

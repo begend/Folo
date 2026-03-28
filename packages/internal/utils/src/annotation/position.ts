@@ -3,7 +3,7 @@ export function calculateTextHash(text: string): string {
   // Simple hash function (djb2 algorithm)
   let hash = 5381
   for (let i = 0; i < text.length; i++) {
-    const char = text.charCodeAt(i)
+    const char = text.codePointAt(i) ?? 0
     hash = (hash << 5) + hash + char // hash * 33 + char
     hash = hash & hash // Convert to 32bit integer
   }
@@ -13,7 +13,7 @@ export function calculateTextHash(text: string): string {
 // Get text before/after selection for context
 export function getTextContext(
   range: Range,
-  contextLength: number = 50,
+  contextLength = 50,
 ): {
   before: string
   after: string
@@ -21,8 +21,8 @@ export function getTextContext(
   const container = range.commonAncestorContainer
   const fullText = container.textContent || ""
 
-  const startOffset = range.startOffset
-  const endOffset = range.endOffset
+  const { startOffset } = range
+  const { endOffset } = range
 
   const beforeStart = Math.max(0, startOffset - contextLength)
   const afterEnd = Math.min(fullText.length, endOffset + contextLength)
@@ -66,7 +66,10 @@ export function createPositionDataFromSelection(range: Range, selectedText: stri
 }
 
 // Find position in article using mixed strategy
-export function findAnnotationPosition(article: HTMLElement, positionData: PositionData): Range | null {
+export function findAnnotationPosition(
+  article: HTMLElement,
+  positionData: PositionData,
+): Range | null {
   // Strategy 1: Text + context matching
   const byText = findByTextAndContext(article, positionData)
   if (byText) return byText
@@ -150,7 +153,13 @@ function findByOffset(article: HTMLElement, offset: number, length: number): Ran
 // Strategy 3: Find by XPath
 function findByXPath(article: HTMLElement, xpath: string): Range | null {
   try {
-    const result = document.evaluate(xpath, article, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+    const result = document.evaluate(
+      xpath,
+      article,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    )
 
     const node = result.singleNodeValue
     if (node) {

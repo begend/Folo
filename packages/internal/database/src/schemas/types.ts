@@ -1,4 +1,5 @@
 import type {
+  annotationsTable,
   collectionsTable,
   entriesTable,
   feedsTable,
@@ -10,7 +11,6 @@ import type {
   translationsTable,
   unreadTable,
   usersTable,
-  annotationsTable,
 } from "."
 
 export type SubscriptionSchema = typeof subscriptionsTable.$inferInsert

@@ -1,9 +1,6 @@
-import {
-  useAnnotationSidebarVisible,
-  useSetAnnotationSidebarVisible,
-} from "@follow/atoms"
-import { useAnnotationsByEntry } from "@follow/store"
+import { useAnnotationSidebarVisible, useSetAnnotationSidebarVisible } from "@follow/atoms"
 import { AnnotationPanel } from "@follow/components"
+import { useAnnotationsByEntry } from "@follow/store"
 import { cn } from "@follow/utils/utils"
 
 interface AnnotationSidebarProps {
@@ -12,7 +9,8 @@ interface AnnotationSidebarProps {
 }
 
 export function AnnotationSidebar({ entryId, onCreateAnnotation }: AnnotationSidebarProps) {
-  const [visible, setVisible] = useAnnotationSidebarVisible()
+  const visible = useAnnotationSidebarVisible()
+  const setVisible = useSetAnnotationSidebarVisible()
   const annotations = useAnnotationsByEntry(entryId)
 
   if (!visible) return null
@@ -21,15 +19,15 @@ export function AnnotationSidebar({ entryId, onCreateAnnotation }: AnnotationSid
     <div
       className={cn(
         "w-80 border-l border-gray-200 dark:border-gray-700",
-        "bg-white dark:bg-gray-800 flex flex-col",
+        "flex flex-col bg-white dark:bg-gray-800",
         "transition-all duration-300 ease-in-out",
       )}
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
         <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">标注</h2>
         <button
           type="button"
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          className="text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
           onClick={() => setVisible(false)}
         >
           ✕

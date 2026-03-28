@@ -7,9 +7,11 @@ import PKG from "@pkg"
 import { getAuthSessionToken } from "./client-session"
 
 const headers = createDesktopAPIHeaders({ version: PKG.version })
+const authAPIURL =
+  IN_ELECTRON || typeof window === "undefined" ? env.VITE_API_URL : window.location.origin
 
 const auth = new Auth({
-  apiURL: env.VITE_API_URL,
+  apiURL: authAPIURL,
   webURL: env.VITE_WEB_URL,
   fetchOptions: {
     headers,

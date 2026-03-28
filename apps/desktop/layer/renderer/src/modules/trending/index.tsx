@@ -73,7 +73,7 @@ export function Trending({
   const [selectedView, setSelectedView] = useState<View>("all")
   const viewOptions = useMemo(() => buildViewOptions(), [])
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["trending", lang, selectedView],
     queryFn: async () => {
       return await followClient.api.trending.getFeeds({
@@ -91,7 +91,7 @@ export function Trending({
     if (!isLoading) {
       onUpdateMaxScroll?.()
     }
-  }, [isLoading])
+  }, [isLoading, onUpdateMaxScroll])
 
   return (
     <div className={cn("mx-auto mt-4 w-full max-w-[800px] space-y-6", narrow && "max-w-[400px]")}>
@@ -197,10 +197,27 @@ export function Trending({
       <div className={cn("grid grid-cols-2 gap-x-7 gap-y-3", narrow && "grid-cols-1")}>
         {isLoading ? (
           <>
-            {Array.from({ length: limit }).map((_, index) => (
-              <Skeleton key={index} className="h-[146px] w-[386px]" />
+            {Array.from({ length: limit }, (_, idx) => idx + 1).map((order) => (
+              <Skeleton key={`trending-skeleton-${order}`} className="h-[146px] w-[386px]" />
             ))}
           </>
+        ) : isError ? (
+          <div className="col-span-full flex min-h-40 flex-col items-center justify-center gap-3 rounded-2xl border border-fill-secondary bg-fill-quaternary p-6 text-center">
+            <div className="text-sm text-text-secondary">Failed to load trending feeds</div>
+            <button
+              type="button"
+              className="rounded-lg bg-material-thin px-3 py-1.5 text-sm font-medium text-text hover:bg-material-medium"
+              onClick={() => {
+                refetch()
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        ) : !data?.data?.length ? (
+          <div className="col-span-full flex min-h-40 items-center justify-center rounded-2xl border border-fill-secondary bg-fill-quaternary p-6 text-sm text-text-secondary">
+            No trending feeds available
+          </div>
         ) : (
           data?.data?.map((item, index) => (
             <div className="relative m-4" key={item.feed.id}>

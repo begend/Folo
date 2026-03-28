@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-
-import { annotationService } from "@follow/database/services/annotation"
 import type { CreateAnnotationDTO, UpdateAnnotationDTO } from "@follow/database/schemas/types"
+import { annotationService } from "@follow/database/services/annotation"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { annotationActions } from "./store"
 
@@ -13,10 +12,7 @@ export const useAnnotation = (id: string) => {
 
 // Get annotations by entry
 export const useAnnotationsByEntry = (entryId: string) => {
-  const annotations = useMemo(
-    () => annotationActions.getAnnotationsByEntry(entryId),
-    [entryId],
-  )
+  const annotations = useMemo(() => annotationActions.getAnnotationsByEntry(entryId), [entryId])
 
   // Load annotations from database on mount or when entryId changes
   useEffect(() => {
@@ -66,25 +62,22 @@ export const useAnnotationsByUser = (userId: string) => {
 
 // Create annotation mutation
 export const useCreateAnnotation = () => {
-  const createAnnotation = useCallback(
-    async (data: CreateAnnotationDTO & { id: string }) => {
-      // Add timestamps
-      const now = new Date()
-      const fullAnnotation = {
-        ...data,
-        createdAt: now,
-        updatedAt: now,
-        userId: null,
-        text: data.text ?? null,
-        color: data.color ?? null,
-        note: data.note ?? null,
-        positionData: data.positionData ?? null,
-      }
-      await annotationActions.createAnnotation(fullAnnotation)
-      return data.id
-    },
-    [],
-  )
+  const createAnnotation = useCallback(async (data: CreateAnnotationDTO & { id: string }) => {
+    // Add timestamps
+    const now = new Date()
+    const fullAnnotation = {
+      ...data,
+      createdAt: now,
+      updatedAt: now,
+      userId: null,
+      text: data.text ?? null,
+      color: data.color ?? null,
+      note: data.note ?? null,
+      positionData: data.positionData ?? null,
+    }
+    await annotationActions.createAnnotation(fullAnnotation)
+    return data.id
+  }, [])
 
   return createAnnotation
 }

@@ -27,6 +27,7 @@ ${BLUE}Folo 开发环境启动脚本${NC}
     -a, --all           启动所有服务 (Web + SSR)
     --no-build          跳过包构建
     --port WEB_PORT     指定 Web 端口 (默认: 2233)
+    --hmr-port PORT     指定 Vite HMR 端口 (默认: 24678)
 
 示例:
     $(basename "$0")              # 启动 Web + SSR (默认)
@@ -43,6 +44,8 @@ START_SSR=true
 START_ELECTRON=false
 SKIP_BUILD=false
 WEB_PORT=2233
+SSR_PORT=2234
+HMR_PORT=24678
 
 # 解析参数
 while [[ $# -gt 0 ]]; do
@@ -78,6 +81,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --port)
             WEB_PORT="$2"
+            shift 2
+            ;;
+        --hmr-port)
+            HMR_PORT="$2"
             shift 2
             ;;
         *)
@@ -122,22 +129,22 @@ build_packages() {
 
 # 启动 SSR 服务
 start_ssr() {
+    ensure_port_available "$SSR_PORT" "SSR"
     echo -e "${YELLOW}启动 SSR 服务...${NC}"
     cd "$PROJECT_ROOT/apps/ssr"
-    pnpm dev &
+    VITE_WEB_URL="http://localhost:$WEB_PORT" pnpm dev &
     SSR_PID=$!
     echo -e "${GREEN}✓ SSR 服务已启动 (PID: $SSR_PID)${NC}"
 }
 
 # 启动 Web 应用
 start_web() {
+    ensure_port_available "$WEB_PORT" "Web"
+    ensure_port_available "$HMR_PORT" "Vite HMR"
     echo -e "${YELLOW}启动 Web 应用...${NC}"
     cd "$PROJECT_ROOT/apps/desktop"
 
-    # 设置端口
-    export PORT=$WEB_PORT
-
-    pnpm dev:web &
+    WEB_BUILD=1 VITE_HMR_PORT="$HMR_PORT" pnpm exec vite --port "$WEB_PORT" --strictPort &
     WEB_PID=$!
     echo -e "${GREEN}✓ Web 应用已启动 (PID: $WEB_PID, 端口: $WEB_PORT)${NC}"
 }
@@ -168,12 +175,13 @@ show_access_info() {
     if [ "$START_WEB" = true ]; then
         echo -e "${BLUE}Web 应用:${NC}"
         echo -e "    ${GREEN}http://localhost:$WEB_PORT${NC}"
+        echo -e "    ${GREEN}HMR ws://localhost:$HMR_PORT${NC}"
         echo ""
     fi
 
     if [ "$START_SSR" = true ]; then
         echo -e "${BLUE}SSR 服务:${NC}"
-        echo -e "    ${GREEN}http://localhost:2234${NC}"
+        echo -e "    ${GREEN}http://localhost:$SSR_PORT${NC}"
         echo ""
     fi
 
@@ -209,6 +217,37 @@ cleanup() {
 
     echo -e "${GREEN}✓ 服务已停止${NC}"
     exit 0
+}
+
+get_listen_pids_by_port() {
+    local port="$1"
+    lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true
+}
+
+ensure_port_available() {
+    local port="$1"
+    local service="$2"
+    local pids
+    pids="$(get_listen_pids_by_port "$port")"
+    if [ -z "$pids" ]; then
+        return
+    fi
+
+    echo -e "${YELLOW}端口 $port 被占用，尝试清理（$service）...${NC}"
+    for pid in $pids; do
+        local cmd
+        cmd="$(ps -p "$pid" -o args= 2>/dev/null || true)"
+        if [[ "$cmd" == *"$PROJECT_ROOT"* ]] || [[ "$cmd" == *"vite"* ]] || [[ "$cmd" == *"tsx watch"* ]]; then
+            kill "$pid" 2>/dev/null || true
+        fi
+    done
+
+    sleep 1
+    if [ -n "$(get_listen_pids_by_port "$port")" ]; then
+        echo -e "${RED}错误: 端口 $port 仍被占用（$service）${NC}"
+        echo -e "${YELLOW}请手动释放后重试，例如: lsof -i :$port${NC}"
+        exit 1
+    fi
 }
 
 # 设置陷阱

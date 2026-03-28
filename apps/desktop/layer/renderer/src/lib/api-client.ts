@@ -1,6 +1,5 @@
 import { IN_ELECTRON } from "@follow/shared/constants"
 import { env } from "@follow/shared/env.desktop"
-import { whoami } from "@follow/store/user/getters"
 import { userActions } from "@follow/store/user/store"
 import { createDesktopAPIHeaders } from "@follow/utils/headers"
 import { FollowClient } from "@follow-app/client-sdk"
@@ -11,15 +10,34 @@ import { setLoginModalShow } from "~/atoms/user"
 
 import { getAuthSessionToken, getClientId, getSessionId } from "./client-session"
 
+const apiBaseURL =
+  IN_ELECTRON || typeof window === "undefined" ? env.VITE_API_URL : window.location.origin
+
 export const followClient = new FollowClient({
   credentials: "include",
   timeout: 30000,
-  baseURL: env.VITE_API_URL,
-  fetch: async (input, options = {}) =>
-    fetch(input.toString(), {
+  baseURL: apiBaseURL,
+  fetch: async (input, options = {}) => {
+    const requestUrl = input.toString()
+    const finalUrl = (() => {
+      if (IN_ELECTRON || typeof window === "undefined") {
+        return requestUrl
+      }
+
+      const url = new URL(requestUrl, window.location.origin)
+      if (url.origin !== window.location.origin || url.pathname.startsWith("/api/")) {
+        return url.toString()
+      }
+
+      url.pathname = `/api${url.pathname}`
+      return url.toString()
+    })()
+
+    return fetch(finalUrl, {
       ...options,
       cache: "no-store",
-    }),
+    })
+  },
 })
 
 export const followApi = followClient.api
@@ -68,9 +86,7 @@ followClient.addErrorInterceptor(async ({ error, response }) => {
 
 followClient.addResponseInterceptor(async ({ response }) => {
   if (response.status === 401) {
-    const authSessionToken = IN_ELECTRON ? getAuthSessionToken() : null
-    const shouldPromptForLogin =
-      response.url.includes("/better-auth/get-session") || (!whoami() && !authSessionToken)
+    const shouldPromptForLogin = response.url.includes("/better-auth/get-session")
 
     if (!shouldPromptForLogin) {
       return response
