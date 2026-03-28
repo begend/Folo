@@ -272,3 +272,211 @@ sequenceDiagram
 - Login metadata：`apps/ssr/client/pages/(login)/login/metadata.ts`
 - 客户端 API：`apps/ssr/client/lib/api-fetch.ts`
 - 服务端 API：`apps/ssr/src/lib/api-client.ts`
+
+---
+
+## 8. SSR 在整体系统中的定位
+
+### 8.1 SSR 的角色
+
+- `apps/ssr` 是“渲染与分发层”，核心职责是：
+  - 分享页 HTML 输出（包含 SEO metadata）
+  - OG 图片动态渲染
+  - 登录/注册/找回密码等 Web 页面壳
+  - 给浏览器注入 `window.__HYDRATE__` 初始数据
+- SSR 不是“业务主存储层”，不负责维护订阅表、文章表等本地业务库。
+
+### 8.2 SSR 与上游 API 的关系
+
+- SSR 通过 Follow SDK/ofetch 调上游 API 拿数据后，组装 HTML 与 metadata。
+- 数据主来源是上游 API（`api.folo.is` 或由环境变量指定的 API），而不是 SSR 本地数据库。
+- SSR 本身没有“列表同步、详情同步、离线缓存落库”等职责。
+
+### 8.3 SSR 与客户端（Desktop/Mobile）的边界
+
+- SSR：负责“首屏可分享、可爬虫、可预览”。
+- Desktop/Mobile：负责“完整阅读体验、同步策略、离线缓存、本地 DB 落库与回灌”。
+
+---
+
+## 9. DB 操作环节说明（谁在写用户订阅表/文章表）
+
+### 9.1 结论
+
+- `apps/ssr` 不承担本地数据库持久化主流程。
+- 用户订阅表、文章表等主要由 `@follow/store` + `@follow/database` 在 Desktop/Mobile 运行时操作。
+
+### 9.2 Desktop/Mobile 的本地 DB 流程
+
+1. 启动阶段初始化数据库并做 migrate（平台相关实现）。
+2. `hydrateDatabaseToStore` 将本地 DB 数据回灌到内存 store。
+3. 业务请求（entries/subscriptions）命中上游 API 后，写入 store。
+4. store 的 `tx.persist` 钩子调用 `EntryService/SubscriptionService` 持久化到 DB。
+
+### 9.3 关键写库点
+
+- 文章落库：`entryActions.upsertMany -> EntryService.upsertMany`
+- 文章详情 patch：`entryActions.updateEntryContent -> EntryService.patch`
+- 订阅落库：`subscriptionActions.upsertMany -> SubscriptionService.upsertMany`
+- 订阅清理：`SubscriptionService.delete/reset`
+
+### 9.4 关键代码索引
+
+- Store hydrate：`packages/internal/store/src/hydrate.ts`
+- Entry store：`packages/internal/store/src/modules/entry/store.ts`
+- Subscription store：`packages/internal/store/src/modules/subscription/store.ts`
+- EntryService：`packages/internal/database/src/services/entry.ts`
+- SubscriptionService：`packages/internal/database/src/services/subscription.ts`
+- Desktop DB：`packages/internal/database/src/db.desktop.ts`
+- Mobile DB：`packages/internal/database/src/db.rn.ts`
+
+---
+
+## 10. SSR 依赖上游 API 接口清单（场景 + 入参 + 出参）
+
+### 10.1 服务端 metadata / OG 阶段调用
+
+#### A. `feeds.get`
+
+- 场景：
+  - `/share/feeds/:id` 注入 title/description/openGraph/hydrate
+  - `/og/feed/:id` 渲染 OG 图
+- 入参：`{ id: string }`
+- 出参（代码中实际消费）：
+  - `data.feed.title`
+  - `data.feed.description`
+  - `data.entries`（hydrate 给客户端用）
+- 代码：
+  - `client/pages/(main)/share/feeds/[id]/metadata.ts`
+  - `src/router/og/feed.tsx`
+
+#### B. `lists.get`
+
+- 场景：
+  - `/share/lists/:id` metadata + hydrate
+  - `/og/list/:id` OG 图
+- 入参：`{ listId: string }`
+- 出参：
+  - `data.list.title`
+  - `data.list.description`
+  - `data.feeds`/`data.list`（hydrate）
+- 代码：
+  - `client/pages/(main)/share/lists/[id]/metadata.ts`
+  - `src/router/og/list.tsx`
+
+#### C. `profiles.getProfile`
+
+- 场景：
+  - `/share/users/:id` metadata + hydrate
+  - `/og/user/:id` OG 图
+- 入参：`{ id?: string, handle?: string }`
+  - 若 path 参数是 BizId 则传 `id`
+  - 否则传 `handle`
+- 出参：
+  - `data.id`
+  - `data.name`
+  - `data.image`
+  - 其它 profile 字段（hydrate）
+- 代码：
+  - `client/pages/(main)/share/users/[id]/metadata.ts`
+  - `src/router/og/user.tsx`
+
+#### D. `subscriptions.get`
+
+- 场景：用户分享页并行拉取公开订阅，用于描述文案与 hydrate
+- 入参：`{ userId: string }`
+- 出参：`data`（订阅数组）
+- 代码：`client/pages/(main)/share/users/[id]/metadata.ts`
+
+#### E. `lists.list`
+
+- 场景：用户分享页并行拉取用户列表数据并 hydrate
+- 入参：`{ userId: string }`
+- 出参：`data`（list 数组）
+- 代码：`client/pages/(main)/share/users/[id]/metadata.ts`
+
+#### F. `GET /better-auth/get-providers`（ofetch）
+
+- 场景：`/login` 页面服务端预取登录 provider，首屏直接可渲染
+- 入参：无
+- 出参：`Record<string, AuthProvider>`
+  - 典型字段：`name`、`id`、`icon64`、`iconDark64`
+- 代码：`client/pages/(login)/login/metadata.ts`
+
+### 10.2 浏览器端（SSR 页面 hydrate 后）调用
+
+#### A. `status.getConfigs`
+
+- 场景：`ServerConfigsProvider` 拉服务端功能配置并写入 atom
+- 入参：无
+- 出参：`data`（配置对象）
+- 代码：`client/providers/server-configs-provider.tsx`
+
+#### B. `feeds.get`
+
+- 场景：分享 feed 页 query（优先命中 hydrate，未命中再请求）
+- 入参：`{ id: string, entriesLimit: 8 }`
+- 出参：`data`（feed + entries）
+- 代码：`client/query/feed.ts`
+
+#### C. `lists.get`
+
+- 场景：分享 list 页 query
+- 入参：`{ listId: string }`
+- 出参：`data`
+- 代码：`client/query/list.ts`
+
+#### D. `lists.list`
+
+- 场景：用户页 query（用户公开列表）
+- 入参：`{ userId: string }`
+- 出参：`data`
+- 代码：`client/query/list.ts`
+
+#### E. `profiles.getProfile`
+
+- 场景：用户页 query（用户 profile）
+- 入参：`{ id?: string, handle?: string }`
+- 出参：`data`
+- 代码：`client/query/users.ts`
+
+#### F. `subscriptions.get`
+
+- 场景：用户页 query（用户订阅分组）
+- 入参：`{ userId?: string }`
+- 出参：`data`（订阅数组，前端按 category 分组）
+- 代码：`client/query/users.ts`
+
+#### G. `entries.preview`
+
+- 场景：分享页条目预览
+- 入参：`{ id: string }`
+- 出参：`data`（预览条目数组）
+- 代码：`client/query/entries.ts`
+
+### 10.3 认证接口（Auth Client）
+
+#### A. 会话与 provider
+
+- `getSession()`
+- `getProviders()`
+- 场景：登录状态判断、社交登录入口展示
+
+#### B. 登录注册与找回
+
+- `signIn.social({ provider, callbackURL })`
+- `loginHandler("credential", "app", { email, password, headers? })`
+- `signUp.email({ email, password, name, callbackURL }, { headers?, onSuccess, onError })`
+- `forgetPassword({ email, redirectTo }, { headers? })`
+- `resetPassword({ newPassword, token })`
+- `twoFactor.verifyTotp({ code })`
+- `oneTimeToken.generate()`
+- 场景：登录、注册、2FA、找回密码、CLI/DeepLink 一次性令牌
+
+#### C. 代码索引
+
+- Auth 客户端导出：`client/lib/auth.ts`
+- 登录流程：`client/modules/login/index.tsx`
+- 注册流程：`client/pages/(login)/register.tsx`
+- 忘记密码：`client/pages/(login)/forget-password.tsx`
+- 重置密码：`client/pages/(login)/reset-password.tsx`
