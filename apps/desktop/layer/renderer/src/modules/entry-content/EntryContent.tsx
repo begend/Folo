@@ -18,6 +18,8 @@ import { useAnimationControls } from "motion/react"
 import * as React from "react"
 import { memo, useEffect, useRef, useState } from "react"
 
+import { AnnotationContainer } from "./annotations"
+
 import { useShowAITranslation } from "~/atoms/ai-translation"
 import { useEntryIsInReadability } from "~/atoms/readability"
 import { useActionLanguage } from "~/atoms/settings/general"
@@ -155,7 +157,7 @@ const EntryContentImpl: Component<EntryContentProps> = ({
     [entryTranslation?.content, entryTranslation?.title],
   )
   return (
-    <div className={cn(className, "flex flex-col @container")}>
+    <div className={cn(className, "flex flex-row @container")}>
       <EntryTitleMetaHandler entryId={entryId} />
       <EntryCommandShortcutRegister entryId={entryId} view={view} />
 
@@ -248,6 +250,9 @@ const EntryContentImpl: Component<EntryContentProps> = ({
         </EntryScrollArea>
         <SourceContentPanel src={safeUrl ?? "#"} />
       </Focusable>
+
+      {/* Annotation Sidebar */}
+      <AnnotationContainer entryId={entryId} />
     </div>
   )
 }
