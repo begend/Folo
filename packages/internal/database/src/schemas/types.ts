@@ -94,3 +94,48 @@ interface IOSImageColors {
 }
 
 export type ImageColorsResult = AndroidImageColors | IOSImageColors | WebImageColors
+
+// Annotation types
+export type AnnotationType = "highlight" | "note" | "mixed"
+
+export type AnnotationColor = "yellow" | "green" | "blue" | "pink" | "orange"
+
+export interface PositionData {
+  textHash?: string
+  contextBefore?: string
+  contextAfter?: string
+  offset?: number
+  length?: number
+  xpath?: string
+}
+
+export interface AnnotationSchema {
+  id: string
+  entryId: string
+  userId?: string
+  type: AnnotationType
+  text?: string
+  color?: AnnotationColor
+  note?: string
+  positionData: PositionData
+  createdAt: number
+  updatedAt: number
+  syncedAt?: number
+}
+
+export interface CreateAnnotationDTO {
+  entryId: string
+  type: AnnotationType
+  text?: string
+  color?: AnnotationColor
+  note?: string
+  positionData: PositionData
+}
+
+export interface UpdateAnnotationDTO {
+  type?: AnnotationType
+  text?: string
+  color?: AnnotationColor
+  note?: string
+  positionData?: PositionData
+}
