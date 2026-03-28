@@ -1,4 +1,4 @@
-import type { AnnotationSchema } from "@follow/database/schemas/types"
+import type { AnnotationSchema, UpdateAnnotationDTO } from "@follow/database/schemas/types"
 import { annotationService } from "@follow/database/services/annotation"
 
 import type { Hydratable, Resetable } from "../../lib/base"
@@ -90,27 +90,23 @@ class AnnotationActions implements Resetable, Hydratable {
     await annotationService.createAnnotation(annotation)
   }
 
-  async updateAnnotation(id: string, updates: Partial<Omit<AnnotationSchema, "id" | "entryId">>) {
+  async updateAnnotation(id: string, updates: Partial<Omit<AnnotationSchema, "id" | "entryId">> | UpdateAnnotationDTO) {
     immerSet((state) => {
       const existing = state.data[id]
       if (existing) {
-        state.data[id] = { ...existing, ...updates }
+        // Filter out null/undefined values from updates
+        const filteredUpdates: Record<string, unknown> = {}
+        for (const [key, value] of Object.entries(updates)) {
+          if (value !== null && value !== undefined) {
+            filteredUpdates[key] = value
+          }
+        }
+        state.data[id] = { ...existing, ...filteredUpdates }
       }
     })
 
-    // Remove null and undefined values before passing to service
-    const { userId, positionData, ...rest } = updates
-    const dataToUpdate: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(rest)) {
-      if (value !== null && value !== undefined) {
-        dataToUpdate[key] = value
-      }
-    }
-    if (positionData !== null && positionData !== undefined) {
-      dataToUpdate.positionData = positionData
-    }
-
-    await annotationService.updateAnnotation(id, dataToUpdate as any)
+    // The service handles null filtering internally
+    await annotationService.updateAnnotation(id, updates)
   }
 
   async deleteAnnotation(id: string) {
