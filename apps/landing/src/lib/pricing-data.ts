@@ -1,5 +1,5 @@
-const PRICING_API_URL = 'https://api.follow.is/status/configs'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+const PRICING_API_URL = process.env.VITE_API_URL || process.env.FOLO_API_URL || 'https://api.follow.is/status/configs'
 
 export type PricingPlanLimit = {
   MAX_AI_TASKS: number

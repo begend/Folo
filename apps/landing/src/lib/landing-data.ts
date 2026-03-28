@@ -1,7 +1,7 @@
-const PRODUCTION_API_URL = 'https://api.follow.is'
-export const PRODUCTION_RSSHUB_ROUTES_URL =
-  'https://docs.rsshub.app/routes.json'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+const PRODUCTION_API_URL = process.env.VITE_API_URL || process.env.FOLO_API_URL || 'https://api.follow.is'
+export const PRODUCTION_RSSHUB_ROUTES_URL =
+  process.env.RSSHUB_ROUTES_URL || 'https://docs.rsshub.app/routes.json'
 
 const HERO_ITEM_LIMIT = 12
 

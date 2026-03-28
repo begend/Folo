@@ -6,7 +6,8 @@ import { readConfig } from "./config"
 import type { OutputFormat } from "./output"
 import { CLIError } from "./output"
 
-export const defaultApiURL = "https://api.folo.is"
+export const defaultApiURL =
+  process.env.FOLO_API_URL || process.env.VITE_API_URL || "https://api.folo.is"
 
 const readString = (value: unknown): string | undefined => {
   return typeof value === "string" && value.length > 0 ? value : undefined
