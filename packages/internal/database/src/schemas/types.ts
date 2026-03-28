@@ -10,6 +10,7 @@ import type {
   translationsTable,
   unreadTable,
   usersTable,
+  annotationsTable,
 } from "."
 
 export type SubscriptionSchema = typeof subscriptionsTable.$inferInsert
@@ -33,6 +34,8 @@ export type SummarySchema = typeof summariesTable.$inferInsert
 export type TranslationSchema = typeof translationsTable.$inferInsert
 
 export type ImageSchema = typeof imagesTable.$inferInsert
+
+export type AnnotationTableSchema = typeof annotationsTable.$inferInsert
 
 export type MediaModel = {
   url: string
