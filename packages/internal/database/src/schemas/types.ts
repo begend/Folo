@@ -115,15 +115,15 @@ export interface PositionData {
 export interface AnnotationSchema {
   id: string
   entryId: string
-  userId?: string
+  userId?: string | null
   type: AnnotationType
-  text?: string
-  color?: AnnotationColor
-  note?: string
-  positionData: PositionData
-  createdAt: number
-  updatedAt: number
-  syncedAt?: number
+  text?: string | null
+  color?: string | null
+  note?: string | null
+  positionData: PositionData | null
+  createdAt: Date
+  updatedAt: Date
+  syncedAt?: Date | null
 }
 
 export interface CreateAnnotationDTO {
