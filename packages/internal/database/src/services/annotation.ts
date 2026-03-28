@@ -46,13 +46,31 @@ class AnnotationServiceStatic implements Resetable {
 
   // Update annotation
   async updateAnnotation(id: string, data: UpdateAnnotationDTO): Promise<void> {
+    const updateData: Record<string, unknown> = {
+      updatedAt: new Date(),
+      syncedAt: null, // Mark as unsynced when updated
+    }
+
+    // Only include fields that are not null/undefined
+    if (data.type !== null && data.type !== undefined) {
+      updateData.type = data.type
+    }
+    if (data.text !== null && data.text !== undefined) {
+      updateData.text = data.text
+    }
+    if (data.color !== null && data.color !== undefined) {
+      updateData.color = data.color
+    }
+    if (data.note !== null && data.note !== undefined) {
+      updateData.note = data.note
+    }
+    if (data.positionData !== null && data.positionData !== undefined) {
+      updateData.positionData = data.positionData
+    }
+
     await db
       .update(annotationsTable)
-      .set({
-        ...data,
-        updatedAt: new Date(),
-        syncedAt: null, // Mark as unsynced when updated
-      })
+      .set(updateData)
       .where(eq(annotationsTable.id, id))
       .execute()
   }

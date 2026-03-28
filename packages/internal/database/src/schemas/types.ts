@@ -118,7 +118,7 @@ export interface AnnotationSchema {
   userId?: string | null
   type: AnnotationType
   text?: string | null
-  color?: string | null
+  color?: AnnotationColor | null
   note?: string | null
   positionData: PositionData | null
   createdAt: Date
@@ -129,16 +129,16 @@ export interface AnnotationSchema {
 export interface CreateAnnotationDTO {
   entryId: string
   type: AnnotationType
-  text?: string
-  color?: AnnotationColor
-  note?: string
-  positionData: PositionData
+  text?: string | null
+  color?: AnnotationColor | null
+  note?: string | null
+  positionData: PositionData | null
 }
 
 export interface UpdateAnnotationDTO {
-  type?: AnnotationType
-  text?: string
-  color?: AnnotationColor
-  note?: string
-  positionData?: PositionData
+  type?: AnnotationType | null
+  text?: string | null
+  color?: AnnotationColor | null
+  note?: string | null
+  positionData?: PositionData | null
 }
