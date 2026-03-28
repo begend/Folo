@@ -76,6 +76,7 @@
     "motion": "12.34.0",
     "react-blurhash": "0.3.0",
     "react-fast-marquee": "1.6.5",
+    "react-highlight-within-textarea": "3.2.2",
     "react-hook-form": "7.71.1",
     "react-i18next": "16.5.4",
     "rehype-infer-description-meta": "2.0.0",

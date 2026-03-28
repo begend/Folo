@@ -8,7 +8,7 @@ import { useIsLoggedIn, useUserRole } from "@follow/store/user/hooks"
 import { PortalProvider } from "@gorhom/portal"
 import * as WebBrowser from "expo-web-browser"
 import { atom, useAtomValue, useSetAtom } from "jotai"
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { View } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useColor } from "react-native-uikit-colors"
@@ -28,6 +28,8 @@ import { Eye2CuteReIcon } from "@/src/icons/eye_2_cute_re"
 import { openLink } from "@/src/lib/native"
 import { useNavigation } from "@/src/lib/navigation/hooks"
 import type { NavigationControllerView } from "@/src/lib/navigation/types"
+import type { AnnotationData } from "@/src/modules/entry-content/annotations"
+import { AnnotationDrawer, AnnotationFabButton } from "@/src/modules/entry-content/annotations"
 import { EntryContentContext, useEntryContentContext } from "@/src/modules/entry-content/ctx"
 import { EntryAISummary } from "@/src/modules/entry-content/EntryAISummary"
 import { EntryNavigationHeader } from "@/src/modules/entry-content/EntryNavigationHeader"
@@ -53,6 +55,11 @@ export const EntryDetailScreen: NavigationControllerView<{
   const isLoggedIn = useIsLoggedIn()
   useAutoMarkAsRead(entryId, !!entry && isLoggedIn)
   const insets = useSafeAreaInsets()
+
+  // Annotation state (will be connected when hooks are available)
+  const [annotationDrawerVisible, setAnnotationDrawerVisible] = useState(false)
+  const annotations: any[] = [] // TODO: Connect to useAnnotationsByEntry when available
+
   const ctxValue = useMemo(
     () => ({
       showAISummaryAtom: atom(entry?.summary || false),
@@ -136,6 +143,14 @@ export const EntryDetailScreen: NavigationControllerView<{
               )}
             </SafeNavigationScrollView>
           </GestureWrapper>
+
+          {/* Annotation components */}
+          <AnnotationDrawer
+            annotations={annotations as AnnotationData[]}
+            visible={annotationDrawerVisible}
+            onClose={() => setAnnotationDrawerVisible(false)}
+          />
+          <AnnotationFabButton onPress={() => setAnnotationDrawerVisible(true)} />
         </BottomTabBarHeightContext>
       </PortalProvider>
     </EntryContentContext>
