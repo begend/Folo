@@ -1,6 +1,7 @@
-import { RootPortal } from "@follow/components/ui/portal"
-import { AnnotationSidebar } from "./AnnotationSidebar"
 import { AnnotationToolbar } from "@follow/components"
+import { RootPortal } from "@follow/components/ui/portal/index.js"
+
+import { AnnotationSidebar } from "./AnnotationSidebar"
 import { useAnnotationIntegration } from "./useAnnotationIntegration"
 
 interface AnnotationContainerProps {
@@ -8,16 +9,10 @@ interface AnnotationContainerProps {
 }
 
 export function AnnotationContainer({ entryId }: AnnotationContainerProps) {
-  const {
-    toolbarPosition,
-    selectedText,
-    handleCreateHighlight,
-    handleCreateNote,
-    handleCloseToolbar,
-  } = useAnnotationIntegration(entryId)
+  const { toolbarPosition, handleCreateHighlight, handleCreateNote, handleCloseToolbar } =
+    useAnnotationIntegration(entryId)
 
-  const handleCreateAnnotation = (type: "highlight" | "note", data: any) => {
-    console.log("Create annotation:", type, data)
+  const handleCreateAnnotation = (_type: "highlight" | "note", _data: unknown) => {
     // This will be handled by the integration hook
   }
 

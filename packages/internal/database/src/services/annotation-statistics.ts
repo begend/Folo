@@ -80,7 +80,7 @@ class AnnotationStatisticsService {
       entriesWithNotes > 0 ? stats.annotationsWithNotes / entriesWithNotes : 0
 
     // Date range
-    const dates = annotations.map((a) => a.createdAt.getTime()).filter((d) => Number.isNaN(d))
+    const dates = annotations.map((a) => a.createdAt.getTime()).filter((d) => !Number.isNaN(d))
     if (dates.length > 0) {
       stats.dateRange.earliest = new Date(Math.min(...dates))
       stats.dateRange.latest = new Date(Math.max(...dates))
@@ -138,7 +138,7 @@ class AnnotationStatisticsService {
     })
 
     const sorted = Object.entries(dayCounts).sort(([, a], [, b]) => b - a)
-    return sorted.length > 0 ? sorted[0][0] : null
+    return sorted.length > 0 ? (sorted[0]?.[0] ?? null) : null
   }
 
   private getPeakHours(annotations: AnnotationSchema[]): Array<{ hour: number; count: number }> {
@@ -164,7 +164,7 @@ class AnnotationStatisticsService {
     })
 
     const sorted = Object.entries(colorCounts).sort(([, a], [, b]) => b - a)
-    return sorted.length > 0 ? sorted[0][0] : null
+    return sorted.length > 0 ? (sorted[0]?.[0] ?? null) : null
   }
 }
 

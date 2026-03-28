@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>标注功能测试页面</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .highlight-yellow {
+        background-color: #fff3cd;
+      }
+      .highlight-green {
+        background-color: #d1e7dd;
+      }
+      .highlight-blue {
+        background-color: #cfe2ff;
+      }
+      .highlight-pink {
+        background-color: #f8d7da;
+      }
+      .highlight-orange {
+        background-color: #ffe5d0;
+      }
+      .annotation-demo {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      h1 {
+        color: #333;
+      }
+      h2 {
+        color: #666;
+        margin-top: 30px;
+      }
+      .note {
+        background: #e9ecef;
+        padding: 15px;
+        border-left: 4px solid #007bff;
+        margin: 10px 0;
+      }
+      .toolbar {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .color-btn {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        margin: 0 5px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+      .color-btn:hover {
+        border-color: #333;
+      }
+      .yellow {
+        background: #fff3cd;
+      }
+      .green {
+        background: #d1e7dd;
+      }
+      .blue {
+        background: #cfe2ff;
+      }
+      .pink {
+        background: #f8d7da;
+      }
+      .orange {
+        background: #ffe5d0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎨 Folo 标注系统演示</h1>
+
+    <div class="note">
+      <strong>说明：</strong>这是标注系统的功能演示。在实际应用中，选择文字后会弹出浮动工具栏。
+    </div>
+
+    <h2>✨ 功能特性</h2>
+
+    <div class="annotation-demo">
+      <h3>1. 文本高亮</h3>
+      <p>
+        Folo 标注系统支持<span class="highlight-yellow">黄色高亮</span>、
+        <span class="highlight-green">绿色高亮</span>、
+        <span class="highlight-blue">蓝色高亮</span>、
+        <span class="highlight-pink">粉色高亮</span>和
+        <span class="highlight-orange">橙色高亮</span>。 你可以选择不同的颜色来标注重要内容。
+      </p>
+    </div>
+
+    <div class="annotation-demo">
+      <h3>2. 标注工具栏</h3>
+      <p>选择文字后会显示浮动工具栏：</p>
+      <div class="toolbar">
+        <span class="color-btn yellow" title="黄色"></span>
+        <span class="color-btn green" title="绿色"></span>
+        <span class="color-btn blue" title="蓝色"></span>
+        <span class="color-btn pink" title="粉色"></span>
+        <span class="color-btn orange" title="橙色"></span>
+        <span style="margin-left: 15px">📝 笔记</span>
+        <span style="margin-left: 10px">✖️ 关闭</span>
+      </div>
+    </div>
+
+    <div class="annotation-demo">
+      <h3>3. 笔记功能</h3>
+      <p>
+        可以为高亮添加<span class="highlight-yellow">笔记</span>。 笔记支持 Markdown 格式，包括：
+      </p>
+      <ul>
+        <li><strong>粗体文字</strong></li>
+        <li><em>斜体文字</em></li>
+        <li>代码块</li>
+        <li>链接</li>
+        <li>列表</li>
+      </ul>
+    </div>
+
+    <h2>🚀 如何在应用中测试</h2>
+
+    <ol>
+      <li><strong>登录应用：</strong>访问 http://localhost:2236 并登录你的 Folo 账号</li>
+      <li><strong>已有内容：</strong>如果你已经订阅了 feeds，直接在 Timeline 中打开文章</li>
+      <li><strong>创建标注：</strong>选择文章中的任何文字</li>
+      <li><strong>使用工具栏：</strong>点击颜色按钮创建高亮</li>
+      <li><strong>添加笔记：</strong>点击"笔记"按钮添加注释</li>
+    </ol>
+
+    <h2>📊 数据结构</h2>
+
+    <div class="annotation-demo">
+      <p>每个标注包含以下信息：</p>
+      <ul>
+        <li><strong>类型：</strong>highlight | note | mixed</li>
+        <li><strong>文本：</strong>被标注的原文（可选）</li>
+        <li><strong>颜色：</strong>yellow | green | blue | pink | orange</li>
+        <li><strong>笔记：</strong>用户添加的注释（可选）</li>
+        <li><strong>位置：</strong>文本在文章中的位置信息</li>
+        <li><strong>时间：</strong>创建和更新时间</li>
+      </ul>
+    </div>
+
+    <h2>💡 使用场景</h2>
+
+    <div class="annotation-demo">
+      <ul>
+        <li><span class="highlight-yellow">高亮重要观点</span></li>
+        <li><span class="highlight-green">标记有用信息</span></li>
+        <li><span class="highlight-blue">标注关键数据</span></li>
+        <li><span class="highlight-pink">标记待查证内容</span></li>
+        <li><span class="highlight-orange">标注灵感想法</span></li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <strong>下一步：</strong>登录 http://localhost:2236，在 Timeline 中选择任何文章，
+      然后选择文字开始标注！
+    </div>
+  </body>
+</html>

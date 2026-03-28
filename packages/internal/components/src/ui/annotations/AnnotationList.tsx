@@ -20,15 +20,6 @@ interface AnnotationListProps {
   className?: string
 }
 
-interface AnnotationListProps {
-  annotations: AnnotationData[]
-  activeAnnotationId?: string | null
-  onAnnotationClick?: (annotation: AnnotationData) => void
-  onAnnotationDelete?: (id: string) => void
-  renderEmpty?: () => React.ReactNode
-  className?: string
-}
-
 // Memoized annotation item for better performance
 const AnnotationListItem = memo<{
   annotation: AnnotationData

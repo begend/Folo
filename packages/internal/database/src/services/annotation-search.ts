@@ -68,10 +68,11 @@ export class AnnotationSearchService {
     const groups: Record<string, AnnotationSchema[]> = {}
 
     annotations.forEach((annotation) => {
-      if (!groups[annotation.entryId]) {
-        groups[annotation.entryId] = []
+      const { entryId } = annotation
+      if (!groups[entryId]) {
+        groups[entryId] = []
       }
-      groups[annotation.entryId].push(annotation)
+      groups[entryId]!.push(annotation)
     })
 
     return groups
@@ -95,8 +96,8 @@ export class AnnotationSearchService {
       },
       withNote: 0,
       dateRange: {
-        earliest: annotations.length > 0 ? annotations[0].createdAt : null,
-        latest: annotations.length > 0 ? annotations[0].createdAt : null,
+        earliest: annotations.length > 0 ? (annotations[0]?.createdAt ?? null) : null,
+        latest: annotations.length > 0 ? (annotations[0]?.createdAt ?? null) : null,
       },
     }
 

@@ -124,7 +124,7 @@ describe("AnnotationService", () => {
 
     const unsynced = await annotationService.getUnsyncedAnnotations()
     expect(unsynced).toHaveLength(1)
-    expect(unsynced[0].id).toBe("unsynced-1")
+    expect(unsynced[0]?.id).toBe("unsynced-1")
   })
 
   it("should mark annotations as synced", async () => {

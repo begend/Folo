@@ -12,18 +12,30 @@ export const [
   ,
   ,
   useAnnotationSidebarVisible,
-  ,
+  useSetAnnotationSidebarVisible,
   getAnnotationSidebarVisible,
   setAnnotationSidebarVisible,
 ] = createAtomHooks(atom<boolean>(false))
 
 // Active annotation id
-export const [, , useActiveAnnotationId, useSetActiveAnnotationId, getActiveAnnotationId, setActiveAnnotationId] =
-  createAtomHooks(atom<string | null>(null))
+export const [
+  ,
+  ,
+  useActiveAnnotationId,
+  useSetActiveAnnotationId,
+  getActiveAnnotationId,
+  setActiveAnnotationId,
+] = createAtomHooks(atom<string | null>(null))
 
 // Selected highlight color
-export const [, , useSelectedAnnotationColor, , getSelectedAnnotationColor, setSelectedAnnotationColor] =
-  createAtomHooks(atom<AnnotationColor>("yellow"))
+export const [
+  ,
+  ,
+  useSelectedAnnotationColor,
+  useSetSelectedAnnotationColor,
+  getSelectedAnnotationColor,
+  setSelectedAnnotationColor,
+] = createAtomHooks(atom<AnnotationColor>("yellow"))
 
 // Annotation mode (highlight vs note)
 export const [, , useAnnotationMode, useSetAnnotationMode, getAnnotationMode, setAnnotationMode] =

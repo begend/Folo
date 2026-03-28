@@ -11,10 +11,20 @@
   },
   "sideEffects": false,
   "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "require": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
     "./action/*": {
       "types": "./src/modules/action/*.ts",
       "require": "./src/modules/action/*.ts",
       "import": "./src/modules/action/*.ts"
+    },
+    "./annotation/*": {
+      "types": "./src/modules/annotation/*.ts",
+      "require": "./src/modules/annotation/*.ts",
+      "import": "./src/modules/annotation/*.ts"
     },
     "./collection/*": {
       "types": "./src/modules/collection/*.ts",

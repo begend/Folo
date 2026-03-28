@@ -3,6 +3,10 @@
   "private": true,
   "sideEffects": false,
   "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
     "./atoms/*": {
       "import": "./src/atoms/*",
       "types": "./src/atoms/*"

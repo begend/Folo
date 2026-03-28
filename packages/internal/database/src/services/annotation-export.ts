@@ -125,23 +125,6 @@ class AnnotationExportService {
 
     this.downloadAsFile(content, filename, mimeType)
   }
-
-  // Export and download annotations
-  async exportAndDownload(
-    entryId: string,
-    entryTitle?: string,
-    format: "markdown" | "json" = "markdown",
-  ): Promise<void> {
-    const content = await this.exportAnnotations(entryId, { format })
-    const timestamp = new Date().toISOString().slice(0, 10)
-    const safeTitle = entryTitle
-      ? entryTitle.replaceAll(/[^a-z0-9\u4e00-\u9fa5]/gi, "_")
-      : "annotations"
-    const filename = `${safeTitle}_annotations_${timestamp}.${format === "markdown" ? "md" : "json"}`
-    const mimeType = format === "markdown" ? "text/markdown" : "application/json"
-
-    this.downloadAsFile(content, filename, mimeType)
-  }
 }
 
 export const annotationExportService = new AnnotationExportService()
